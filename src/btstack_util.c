@@ -168,6 +168,16 @@ void reverse_bd_addr(const bd_addr_t src, bd_addr_t dest){
     reverse_bytes(src, dest, 6);
 }
 
+bool btstack_is_null(const uint8_t * buffer, uint16_t size){
+    uint16_t i;
+    for (i=0; i < size ; i++){
+        if (buffer[i] != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 uint32_t btstack_min(uint32_t a, uint32_t b){
     return (a < b) ? a : b;
 }
@@ -546,10 +556,11 @@ uint16_t btstack_next_cid_ignoring_zero(uint16_t current_cid){
     return next_cid;
 }
 
-void btstack_strcpy(char * dst, uint16_t dst_size, const char * src){
-    uint16_t bytes_to_copy = (uint16_t) btstack_min( dst_size - 1, (uint32_t) strlen(src));
+uint16_t btstack_strcpy(char * dst, uint16_t dst_size, const char * src){
+    uint16_t bytes_to_copy = (uint16_t) btstack_min( dst_size - 1, strlen(src));
     (void) memcpy(dst, src, bytes_to_copy);
     dst[bytes_to_copy] = 0;
+    return bytes_to_copy + 1;
 }
 
 void btstack_strcat(char * dst, uint16_t dst_size, const char * src){
@@ -558,4 +569,39 @@ void btstack_strcat(char * dst, uint16_t dst_size, const char * src){
     uint16_t bytes_to_copy = btstack_min( src_len, dst_size - dst_len - 1);
     (void) memcpy( &dst[dst_len], src, bytes_to_copy);
     dst[dst_len + bytes_to_copy] = 0;
+}
+
+uint16_t btstack_virtual_memcpy(
+    const uint8_t * field_data, uint16_t field_len, uint16_t field_offset, // position of field in complete data block
+    uint8_t * buffer, uint16_t buffer_size, uint16_t buffer_offset){
+
+    uint16_t after_buffer = buffer_offset + buffer_size ;
+    // bail before buffer
+    if ((field_offset + field_len) < buffer_offset){
+        return 0;
+    }
+    // bail after buffer
+    if (field_offset >= after_buffer){
+        return 0;
+    }
+    // calc overlap
+    uint16_t bytes_to_copy = field_len;
+    
+    uint16_t skip_at_start = 0;
+    if (field_offset < buffer_offset){
+        skip_at_start = buffer_offset - field_offset;
+        bytes_to_copy -= skip_at_start;
+    }
+
+    uint16_t skip_at_end = 0;
+    if ((field_offset + field_len) > after_buffer){
+        skip_at_end = (field_offset + field_len) - after_buffer;
+        bytes_to_copy -= skip_at_end;
+    }
+    
+    btstack_assert((skip_at_end + skip_at_start) <= field_len);
+    btstack_assert(bytes_to_copy <= field_len);
+
+    memcpy(&buffer[(field_offset + skip_at_start) - buffer_offset], &field_data[skip_at_start], bytes_to_copy);
+    return bytes_to_copy;
 }

@@ -918,7 +918,7 @@ const hci_cmd_t hci_write_num_broadcast_retransmissions = {
  * @param type 0 = current transmit level, 1 = max transmit level
  */
 const hci_cmd_t hci_read_transmit_power_level = {
-    HCI_OPCODE_HCI_READ_TRANSMIT_POWER_LEVEL, "11"
+    HCI_OPCODE_HCI_READ_TRANSMIT_POWER_LEVEL, "H1"
 };
 
 /**
@@ -1645,7 +1645,7 @@ const hci_cmd_t hci_le_set_default_phy = {
  * @param phy_options
  */
 const hci_cmd_t hci_le_set_phy = {
-    HCI_OPCODE_HCI_LE_SET_PHY, "H1111"
+    HCI_OPCODE_HCI_LE_SET_PHY, "H1112"
 // LE PHY Update Complete is generated on completion
 };
 
@@ -2425,7 +2425,6 @@ const hci_cmd_t hci_bcm_write_sco_pcm_int = {
  * @param is_master is 0 for slave, is 1 for master
  * @param sample_rate is 0 for 8 kHz, 1 for 16 kHz, 2 for 4 kHz
  * @param clock_rate is 0 for 128 kz, 1 for 256 kHz, 2 for 512 khz, 3 for 1024 kHz, 4 for 2048 khz
- * @param clock_mode is 0 for slabe and 1 for master
  */
 const hci_cmd_t hci_bcm_write_i2spcm_interface_param = {
     HCI_OPCODE_HCI_BCM_WRITE_I2SPCM_INTERFACE_PARAM, "1111"
@@ -2608,5 +2607,12 @@ const hci_cmd_t hci_ti_write_hardware_register = {
  * @brief Configure SCO routing on Realtek Controllers
  */
 const hci_cmd_t hci_rtk_configure_sco_routing = {
-    HCI_OPCODE (0x3f, 0x93), "111111111"
+    HCI_OPCODE_HCI_RTK_CONFIGURE_SCO_ROUTING, "111111111"
+};
+
+/**
+* @brief Read Card Information
+*/
+const hci_cmd_t hci_rtk_read_card_info = {
+    HCI_OPCODE_HCI_RTK_READ_CARD_INFO, "11111"
 };
